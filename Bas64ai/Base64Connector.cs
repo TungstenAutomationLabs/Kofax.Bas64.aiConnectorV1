@@ -28,16 +28,18 @@ namespace Kofax.Base64ConnectorV1
         /// <param name="Base64FieldID">Field ID to filter results.</param>
         /// <param name="extractionResult">Resulting JSON from calling the Base64GetExtractionResult method.</param>
         /// <returns>Concatenated text results.</returns>
-        public string Base64GetExtractionResult(string ktaDocID, string docFileExtension, string ktaSDKUrl, string ktaSessionID, string Base64Token)
+        public string Base64GetExtractionResult(string ktaDocID, string docFileExtension, int pageCount, string ktaSDKUrl, string ktaSessionID, string Base64Token)
         {
-            string json = Base64ScanFile(ktaDocID, docFileExtension, ktaSDKUrl, ktaSessionID, Base64Token);
+            string json = Base64ScanFile(ktaDocID, docFileExtension, pageCount, ktaSDKUrl, ktaSessionID, Base64Token);
             string[,] array =  ExtractFields(json);
             return JsonBuilder.BuildJson(array);
         }
 
         /// <summary>
-        /// Queries Base64.ai getting all fields from the document, returns a simple JSON with the key/value pairs.
+        /// Queries Base64.ai getting all fields from the document, getting the file from a specific path;
+        /// returns a simple JSON with the key/value pairs.
         /// </summary>
+        /// <param name="filepath">Path to the file to be sent.</param>
         /// <param name="Base64FieldID">Field ID to filter results.</param>
         /// <param name="extractionResult">Resulting JSON from calling the Base64GetExtractionResult method.</param>
         /// <returns>Concatenated text results.</returns>
@@ -54,13 +56,13 @@ namespace Kofax.Base64ConnectorV1
         /// <param name="Base64FieldID">Field ID to filter results.</param>
         /// <param name="extractionResult">Resulting JSON from calling the Base64GetExtractionResult method.</param>
         /// <returns>Concatenated text results.</returns>
-        public string GetFieldValueFromBase64Extraction(string jsonExtraction, string fieldName, string Base64Token)
-        {
-            //string json = Base64ScanFileFromFile(filepath, docFileExtension, Base64Token);
-            //string[,] array = ExtractFields(json);
-            //return JsonBuilder.BuildJson(array);
-            return "";
-        }
+        //public string GetFieldValueFromBase64Extraction(string jsonExtraction, string fieldName, string Base64Token)
+        //{
+        //    //string json = Base64ScanFileFromFile(filepath, docFileExtension, Base64Token);
+        //    //string[,] array = ExtractFields(json);
+        //    //return JsonBuilder.BuildJson(array);
+        //    return "";
+        //}
 
         #endregion
 
@@ -74,7 +76,7 @@ namespace Kofax.Base64ConnectorV1
         /// <param name="sessionID">KTA Session ID.</param>
         /// <param name="Base64Token">Token provided by Base64; please include 'Bearer' before it.</param>
         /// <returns>Base64 File ID.</returns>
-        private string Base64ScanFile(string docID, string docFileExtension, string ktaSDKUrl, string ktaSessionID, string Base64Token)
+        private string Base64ScanFile(string docID, string docFileExtension, int pageCount, string ktaSDKUrl, string ktaSessionID, string Base64Token)
         {
             if (docID.Trim().Length == 0)
             {
@@ -97,7 +99,8 @@ namespace Kofax.Base64ConnectorV1
             // Get the file's MIME type
             string mimeType = FileToBase64Encoder.GetMimeType(docFileExtension, fileBytes);
             // Construct the JSON body
-            string requestBody = $"{{\"document\":\"data:{mimeType};base64,{fileBase64}\"}}";
+            string settingsString = (pageCount > 0) ? $",\"settings\":{{\"limitPages\":{pageCount}}}" : "";
+            string requestBody = $"{{\"document\":\"data:{mimeType};base64,{fileBase64}\"{settingsString}}}";
             // Convert the JSON data to bytes
             byte[] jsonDataBytes = Encoding.UTF8.GetBytes(requestBody);
 
