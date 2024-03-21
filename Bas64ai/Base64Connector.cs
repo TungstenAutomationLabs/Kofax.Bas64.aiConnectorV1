@@ -10,6 +10,56 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
+/*
+ * Base64.aiConnector
+ * 
+ * End User License Agreement (EULA)
+ * 
+ * IMPORTANT: PLEASE READ THIS AGREEMENT CAREFULLY BEFORE USING THIS SOFTWARE.
+ * 
+ * 1. GRANT OF LICENSE: Tungsten Automation grants you a limited, non-exclusive,
+ * non-transferable, and revocable license to use this software solely for the
+ * purposes described in the documentation accompanying the software.
+ * 
+ * 2. RESTRICTIONS: You may not sublicense, rent, lease, sell, distribute,
+ * redistribute, assign, or otherwise transfer your rights to this software.
+ * You may not reverse engineer, decompile, or disassemble this software,
+ * except and only to the extent that such activity is expressly permitted by
+ * applicable law notwithstanding this limitation.
+ * 
+ * 3. COPYRIGHT: This software is protected by copyright laws and international
+ * copyright treaties, as well as other intellectual property laws and treaties.
+ * 
+ * 4. DISCLAIMER OF WARRANTY: THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN
+ * NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+ * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * 5. TERMINATION: Without prejudice to any other rights, Tungsten Automation may
+ * terminate this EULA if you fail to comply with the terms and conditions of this
+ * EULA. In such event, you must destroy all copies of the software and all of its
+ * component parts.
+ * 
+ * 6. GOVERNING LAW: This agreement shall be governed by the laws of USA,
+ * without regard to conflicts of laws principles. Any disputes arising hereunder shall
+ * be subject to the exclusive jurisdiction of the courts of USA.
+ * 
+ * 7. ENTIRE AGREEMENT: This EULA constitutes the entire agreement between you and
+ * Tungsten Automation relating to the software and supersedes all prior or contemporaneous
+ * understandings regarding such subject matter. No amendment to or modification of this
+ * EULA will be binding unless made in writing and signed by Tungsten Automation.
+ * 
+ * Tungsten Automation
+ * www.tungstenautomation.com
+ * 03/19/2024
+ */
+
 namespace Kofax.Base64ConnectorV1
 {
     /// <summary>
@@ -25,8 +75,12 @@ namespace Kofax.Base64ConnectorV1
         /// <summary>
         /// Queries Base64.ai getting all fields from the document, returns a simple JSON with the key/value pairs.
         /// </summary>
-        /// <param name="Base64FieldID">Field ID to filter results.</param>
-        /// <param name="extractionResult">Resulting JSON from calling the Base64GetExtractionResult method.</param>
+        /// <param name="ktaDocID">KTA Document ID.</param>
+        /// <param name="docFileExtension">File's extension.</param>
+        /// <param name="pageCount">Number of pages to be read by Base64.ai; value of 0 (zero) means all.</param>
+        /// <param name="ktaSDKUrl">Complete URL for KTA's SDK instance.</param>
+        /// <param name="ktaSessionID">KTA Session ID.</param>
+        /// <param name="Base64Token">Token provided by Base64; please include 'Bearer' before it.</param>
         /// <returns>Concatenated text results.</returns>
         public string Base64GetExtractionResult(string ktaDocID, string docFileExtension, int pageCount, string ktaSDKUrl, string ktaSessionID, string Base64Token)
         {
@@ -40,9 +94,9 @@ namespace Kofax.Base64ConnectorV1
         /// returns a simple JSON with the key/value pairs.
         /// </summary>
         /// <param name="filepath">Path to the file to be sent.</param>
-        /// <param name="Base64FieldID">Field ID to filter results.</param>
-        /// <param name="extractionResult">Resulting JSON from calling the Base64GetExtractionResult method.</param>
-        /// <returns>Concatenated text results.</returns>
+        /// <param name="docFileExtension">File's extension.</param>
+        /// <param name="Base64Token">Token provided by Base64; please include 'Bearer' before it.</param>
+        /// <returns>String array containing key-value-confidence.</returns>
         public string Base64GetExtractionResultFromFile(string filepath, string docFileExtension, string Base64Token)
         {
             string json = Base64ScanFileFromFile(filepath, docFileExtension, Base64Token);
@@ -72,6 +126,8 @@ namespace Kofax.Base64ConnectorV1
         /// Uploads a KTA PDF file to Base64
         /// </summary>
         /// <param name="docID">KTA Document ID.</param>
+        /// <param name="docFileExtension">File's extension.</param>
+        /// <param name="pageCount">Number of pages to be read by Base64.ai; value of 0 (zero) means all.</param>
         /// <param name="ktaSDKUrl">Complete URL for KTA's SDK instance.</param>
         /// <param name="sessionID">KTA Session ID.</param>
         /// <param name="Base64Token">Token provided by Base64; please include 'Bearer' before it.</param>
@@ -130,9 +186,8 @@ namespace Kofax.Base64ConnectorV1
         /// <summary>
         /// Uploads a KTA PDF file to Base64
         /// </summary>
-        /// <param name="docID">KTA Document ID.</param>
-        /// <param name="ktaSDKUrl">Complete URL for KTA's SDK instance.</param>
-        /// <param name="sessionID">KTA Session ID.</param>
+        /// <param name="filepath">UNC path for file to be processed.</param>
+        /// <param name="docFileExtension">File's extension.</param>
         /// <param name="Base64Token">Token provided by Base64; please include 'Bearer' before it.</param>
         /// <returns>Base64 File ID.</returns>
         private string Base64ScanFileFromFile(string filepath, string docFileExtension, string Base64Token)
@@ -293,10 +348,9 @@ namespace Kofax.Base64ConnectorV1
         //}
 
         /// <summary>
-        /// Concatenates all text extracted from the results for the specified Field ID.
+        /// Extracts the key/value/confidence information from JSON and puts it in an array of string.
         /// </summary>
-        /// <param name="zuvaFieldID">Field ID to filter results.</param>
-        /// <param name="extractionResult">Resulting JSON from calling the ZuvaGetExtractionResult method.</param>
+        /// <param name="json">Resulting JSON string from Base64 call.</param>
         /// <returns>Concatenated text results.</returns>
         private string[,] ExtractFields(string json)
         {
