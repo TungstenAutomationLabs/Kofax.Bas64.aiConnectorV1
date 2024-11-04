@@ -377,16 +377,29 @@ namespace Kofax.Base64ConnectorV1
                         resultList.Add(new string[] { key, value, confidence });
                     }
 
-                    string[,] resultArray = new string[resultList.Count, 3];
-                    for (int i = 0; i < resultList.Count; i++)
+                    // Extract "tables" data
+                    JArray tables = jsonElement["features"]?["tables"].ToObject<JArray>();
+                    if (tables != null)
                     {
-                        resultArray[i, 0] = resultList[i][0];
-                        resultArray[i, 1] = resultList[i][1];
-                        resultArray[i, 2] = resultList[i][2];
-                    }
+                        // Loop through each table in the tables array
+                        foreach (var table in tables)
+                        {
+                            // Convert each table to a JSON string and add it to the list
+                            resultList.Add(new string[] { "Table", table.ToString(Newtonsoft.Json.Formatting.None), "" });
+                        }
 
-                    return resultArray;
+                    }
                 }
+
+                string[,] resultArray = new string[resultList.Count, 3];
+                for (int i = 0; i < resultList.Count; i++)
+                {
+                    resultArray[i, 0] = resultList[i][0];
+                    resultArray[i, 1] = resultList[i][1];
+                    resultArray[i, 2] = resultList[i][2];
+                }
+
+                return resultArray;
             }
             return null;
         }

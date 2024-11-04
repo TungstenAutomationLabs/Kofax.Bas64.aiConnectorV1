@@ -22,7 +22,7 @@ namespace Base64UnitTestProject
             //Assert.IsNotNull(fileid);
 
 
-            string extraction = Base64Connector.Base64GetExtractionResult("2e729f33-c3a7-4f50-8fbd-b13900ccdbbe", "pdf", KTASDKURL, SESSIONID, Base64token);
+            string extraction = Base64Connector.Base64GetExtractionResult("72d417fc-022f-4988-bb65-b21101606d0e", "png", 0, KTASDKURL, SESSIONID, Base64token);
             //string extraction = Base64Connector.Base64GetExtractionResultFromFile("C:\\Program Files\\Kofax\\TotalAgility\\Sample Processes\\Capture SDK Sample Package\\Sample Images\\file1.tif", ".tif", Base64token);// ("94ceabcb-e198-418e-9ede-b00d00e84670", "pdf", KTASDKURL, "2BDC955ED880C84B9CB52287D59EBF37", Base64token);
             Assert.IsNotNull(extraction);
 
